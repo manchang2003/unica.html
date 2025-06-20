@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Portal - Results Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #10b981;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-card {
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .grade-A { color: #10b981; }
+        .grade-B { color: #3b82f6; }
+        .grade-C { color: #f59e0b; }
+        .grade-D { color: #ef4444; }
+        .grade-F { color: #dc2626; }
+        
+        .animated-underline {
+            position: relative;
+        }
+        
+        .animated-underline::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .animated-underline:hover::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="min-h-screen flex flex-col" id="app">
+        <!-- Login Screen -->
+        <div class="flex-1 flex items-center justify-center p-4" id="login-screen">
+            <div class="w-full max-w-md">
+                <div class="bg-white rounded-lg overflow-hidden card-shadow">
+                    <div class="gradient-bg p-6 text-center">
+                        <h1 class="text-2xl font-bold text-white">School Portal</h1>
+                        <p class="text-white opacity-90 mt-2">Access your academic results</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-center mb-6">
+                            <button id="student-login-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-l-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Student</button>
+                            <button id="teacher-login-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-r-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Teacher</button>
+                        </div>
+                        
+                        <!-- Student Login Form -->
+                        <form id="student-login-form" class="space-y-4">
+                            <div>
+                                <label for="student-id" class="block text-sm font-medium text-gray-700">Student ID</label>
+                                <input type="text" id="student-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="e.g. ST2023001" required>
+                            </div>
+                            <div>
+                                <label for="student-password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input type="password" id="student-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="••••••••" required>
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Sign in as Student
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Teacher Login Form -->
+                        <form id="teacher-login-form" class="space-y-4 hidden">
+                            <div>
+                                <label for="teacher-id" class="block text-sm font-medium text-gray-700">Teacher ID</label>
+                                <input type="text" id="teacher-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="e.g. TCH2023001" required>
+                            </div>
+                            <div>
+                                <label for="teacher-password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input type="password" id="teacher-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="••••••••" required>
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Sign in as Teacher
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="mt-4 text-center">
+                            <a href="#" class="text-sm text-indigo-600 hover:text-indigo-500 animated-underline">Forgot password?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Student Dashboard -->
+        <div class="hidden" id="student-dashboard">
+            <header class="gradient-bg text-white shadow-lg">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <i class="fas fa-graduation-cap text-2xl"></i>
+                            <h1 class="text-xl font-bold">Student Dashboard</h1>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span id="student-name-display" class="font-medium">John Doe</span>
+                            <button id="student-logout-btn" class="px-3 py-1 bg-white text-indigo-600 rounded-md text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Academic Results</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="student-results-container">
+                        <!-- Results will be populated here by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Academic Performance Summary</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-medium text-gray-700">GPA</h3>
+                                <i class="fas fa-star text-yellow-500"></i>
+                            </div>
+                            <p class="text-3xl font-bold text-blue-600 mt-2" id="student-gpa">3.75</p>
+                            <p class="text-sm text-gray-500 mt-1">Current Semester</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-medium text-gray-700">Best Subject</h3>
+                                <i class="fas fa-trophy text-green-500"></i>
+                            </div>
+                            <p class="text-3xl font-bold text-green-600 mt-2" id="student-best-subject">Mathematics</p>
+                            <p class="text-sm text-gray-500 mt-1">Grade: A</p>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-medium text-gray-700">Attendance</h3>
+                                <i class="fas fa-calendar-check text-purple-500"></i>
+                            </div>
+                            <p class="text-3xl font-bold text-purple-600 mt-2" id="student-attendance">94%</p>
+                            <p class="text-sm text-gray-500 mt-1">Current Semester</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Teacher Dashboard -->
+        <div class="hidden" id="teacher-dashboard">
+            <header class="gradient-bg text-white shadow-lg">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <i class="fas fa-chalkboard-teacher text-2xl"></i>
+                            <h1 class="text-xl font-bold">Teacher Dashboard</h1>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span id="teacher-name-display" class="font-medium">Mrs. Smith</span>
+                            <button id="teacher-logout-btn" class="px-3 py-1 bg-white text-indigo-600 rounded-md text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Upload Student Results</h2>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <form id="upload-results-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="student-select" class="block text-sm font-medium text-gray-700">Select Student</label>
+                                    <select id="student-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" required>
+                                        <option value="">Select a student</option>
+                                        <!-- Students will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="subject-select" class="block text-sm font-medium text-gray-700">Subject</label>
+                                    <select id="subject-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" required>
+                                        <option value="">Select a subject</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="English">English</option>
+                                        <option value="Science">Science</option>
+                                        <option value="History">History</option>
+                                        <option value="Geography">Geography</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label for="test-score" class="block text-sm font-medium text-gray-700">Test Score (out of 100)</label>
+                                    <input type="number" id="test-score" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="Enter score" required>
+                                </div>
+                                <div>
+                                    <label for="exam-score" class="block text-sm font-medium text-gray-700">Exam Score (out of 100)</label>
+                                    <input type="number" id="exam-score" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="Enter score" required>
+                                </div>
+                                <div>
+                                    <label for="grade" class="block text-sm font-medium text-gray-700">Grade</label>
+                                    <select id="grade" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" required>
+                                        <option value="">Select grade</option>
+                                        <option value="A">A (Excellent)</option>
+                                        <option value="B">B (Good)</option>
+                                        <option value="C">C (Average)</option>
+                                        <option value="D">D (Below Average)</option>
+                                        <option value="F">F (Fail)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="remarks" class="block text-sm font-medium text-gray-700">Remarks</label>
+                                <textarea id="remarks" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="Enter any remarks about the student's performance"></textarea>
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <i class="fas fa-upload mr-2"></i> Upload Results
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Recently Uploaded Results</h2>
+                    
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="recent-results-table">
+                                <!-- Recent results will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - in a real app, this would come from a database
+        const students = [
+            { id: "ST2023001", name: "John Doe", password: "student123", class: "Grade 10A" },
+            { id: "ST2023002", name: "Jane Smith", password: "student123", class: "Grade 10B" },
+            { id: "ST2023003", name: "Michael Johnson", password: "student123", class: "Grade 11A" }
+        ];
+        
+        const teachers = [
+            { id: "TCH2023001", name: "Mrs. Smith", password: "teacher123", subject: "Mathematics" },
+            { id: "TCH2023002", name: "Mr. Brown", password: "teacher123", subject: "English" }
+        ];
+        
+        let results = [
+            { studentId: "ST2023001", studentName: "John Doe", subject: "Mathematics", testScore: 85, examScore: 90, grade: "A", remarks: "Excellent performance", date: "2023-05-15" },
+            { studentId: "ST2023001", studentName: "John Doe", subject: "English", testScore: 78, examScore: 82, grade: "B", remarks: "Good improvement", date: "2023-05-18" },
+            { studentId: "ST2023002", studentName: "Jane Smith", subject: "Science", testScore: 92, examScore: 88, grade: "A", remarks: "Outstanding work", date: "2023-05-20" },
+            { studentId: "ST2023003", studentName: "Michael Johnson", subject: "History", testScore: 65, examScore: 70, grade: "C", remarks: "Needs more effort", date: "2023-05-22" }
+        ];
+        
+        // DOM Elements
+        const loginScreen = document.getElementById('login-screen');
+        const studentDashboard = document.getElementById('student-dashboard');
+        const teacherDashboard = document.getElementById('teacher-dashboard');
+        
+        const studentLoginBtn = document.getElementById('student-login-btn');
+        const teacherLoginBtn = document.getElementById('teacher-login-btn');
+        
+        const studentLoginForm = document.getElementById('student-login-form');
+        const teacherLoginForm = document.getElementById('teacher-login-form');
+        
+        const studentLogoutBtn = document.getElementById('student-logout-btn');
+        const teacherLogoutBtn = document.getElementById('teacher-logout-btn');
+        
+        const studentNameDisplay = document.getElementById('student-name-display');
+        const teacherNameDisplay = document.getElementById('teacher-name-display');
+        
+        const studentResultsContainer = document.getElementById('student-results-container');
+        const recentResultsTable = document.getElementById('recent-results-table');
+        
+        const uploadResultsForm = document.getElementById('upload-results-form');
+        const studentSelect = document.getElementById('student-select');
+        
+        // Current user
+        let currentUser = null;
+        
+        // Event Listeners
+        studentLoginBtn.addEventListener('click', () => {
+            studentLoginBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            studentLoginBtn.classList.add('bg-indigo-600', 'text-white');
+            
+            teacherLoginBtn.classList.remove('bg-indigo-600', 'text-white');
+            teacherLoginBtn.classList.add('bg-gray-200', 'text-gray-700');
+            
+            studentLoginForm.classList.remove('hidden');
+            teacherLoginForm.classList.add('hidden');
+        });
+        
+        teacherLoginBtn.addEventListener('click', () => {
+            teacherLoginBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            teacherLoginBtn.classList.add('bg-indigo-600', 'text-white');
+            
+            studentLoginBtn.classList.remove('bg-indigo-600', 'text-white');
+            studentLoginBtn.classList.add('bg-gray-200', 'text-gray-700');
+            
+            teacherLoginForm.classList.remove('hidden');
+            studentLoginForm.classList.add('hidden');
+            
+            // Populate student dropdown for teachers
+            populateStudentDropdown();
+        });
+        
+        studentLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const studentId = document.getElementById('student-id').value;
+            const password = document.getElementById('student-password').value;
+            
+            const student = students.find(s => s.id === studentId && s.password === password);
+            
+            if (student) {
+                currentUser = student;
+                loginScreen.classList.add('hidden');
+                studentDashboard.classList.remove('hidden');
+                studentNameDisplay.textContent = student.name;
+                
+                // Load student results
+                loadStudentResults(student.id);
+            } else {
+                alert('Invalid student ID or password');
+            }
+        });
+        
+        teacherLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const teacherId = document.getElementById('teacher-id').value;
+            const password = document.getElementById('teacher-password').value;
+            
+            const teacher = teachers.find(t => t.id === teacherId && t.password === password);
+            
+            if (teacher) {
+                currentUser = teacher;
+                loginScreen.classList.add('hidden');
+                teacherDashboard.classList.remove('hidden');
+                teacherNameDisplay.textContent = teacher.name;
+                
+                // Load recent results
+                loadRecentResults();
+            } else {
+                alert('Invalid teacher ID or password');
+            }
+        });
+        
+        studentLogoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            studentDashboard.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            
+            // Reset form
+            studentLoginForm.reset();
+        });
+        
+        teacherLogoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            teacherDashboard.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            
+            // Reset form
+            teacherLoginForm.reset();
+        });
+        
+        uploadResultsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const studentId = studentSelect.value;
+            const student = students.find(s => s.id === studentId);
+            
+            const newResult = {
+                studentId: studentId,
+                studentName: student.name,
+                subject: document.getElementById('subject-select').value,
+                testScore: parseInt(document.getElementById('test-score').value),
+                examScore: parseInt(document.getElementById('exam-score').value),
+                grade: document.getElementById('grade').value,
+                remarks: document.getElementById('remarks').value,
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            results.push(newResult);
+            
+            // Reset form
+            uploadResultsForm.reset();
+            
+            // Reload recent results
+            loadRecentResults();
+            
+            // Show success message
+            alert('Results uploaded successfully!');
+        });
+        
+        // Functions
+        function loadStudentResults(studentId) {
+            const studentResults = results.filter(r => r.studentId === studentId);
+            
+            studentResultsContainer.innerHTML = '';
+            
+            if (studentResults.length === 0) {
+                studentResultsContainer.innerHTML = '<p class="text-gray-500 col-span-3 text-center py-8">No results available yet.</p>';
+                return;
+            }
+            
+            studentResults.forEach(result => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md p-6 result-card';
+                
+                const gradeClass = `grade-${result.grade} text-4xl font-bold mb-2`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">${result.subject}</h3>
+                            <p class="text-gray-500">${currentUser.class}</p>
+                        </div>
+                        <div class="${gradeClass}">${result.grade}</div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Test Score</p>
+                            <p class="font-medium">${result.testScore}/100</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Exam Score</p>
+                            <p class="font-medium">${result.examScore}/100</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">Remarks</p>
+                        <p class="font-medium">${result.remarks || 'No remarks'}</p>
+                    </div>
+                    <div class="mt-4 text-right text-sm text-gray-400">
+                        ${result.date}
+                    </div>
+                `;
+                
+                studentResultsContainer.appendChild(card);
+            });
+            
+            // Calculate and display GPA (simplified for demo)
+            const gradePoints = studentResults.map(r => {
+                switch(r.grade) {
+                    case 'A': return 4;
+                    case 'B': return 3;
+                    case 'C': return 2;
+                    case 'D': return 1;
+                    default: return 0;
+                }
+            });
+            
+            const gpa = (gradePoints.reduce((a, b) => a + b, 0) / gradePoints.length).toFixed(2);
+            document.getElementById('student-gpa').textContent = gpa;
+            
+            // Find best subject
+            const bestSubject = studentResults.reduce((best, current) => {
+                return (current.grade < best.grade) ? current : best;
+            }, {grade: 'F'});
+            
+            document.getElementById('student-best-subject').textContent = bestSubject.subject || 'N/A';
+        }
+        
+        function loadRecentResults() {
+            recentResultsTable.innerHTML = '';
+            
+            // Get last 5 results (sorted by date)
+            const recentResults = [...results]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+            
+            if (recentResults.length === 0) {
+                recentResultsTable.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">No results uploaded yet</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            recentResults.forEach(result => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${result.studentName}</div>
+                                <div class="text-sm text-gray-500">${result.studentId}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${result.subject}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${result.testScore}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${result.examScore}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            ${result.grade}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${result.date}
+                    </td>
+                `;
+                
+                recentResultsTable.appendChild(row);
+            });
+        }
+        
+        function populateStudentDropdown() {
+            studentSelect.innerHTML = '<option value="">Select a student</option>';
+            
+            students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = `${student.name} (${student.id})`;
+                studentSelect.appendChild(option);
+            });
+        }
+        
+        // Initialize
+        studentLoginBtn.click();
+    </script>
+</body>
+</html>
